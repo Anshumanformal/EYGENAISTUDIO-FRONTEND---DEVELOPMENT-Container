@@ -1,0 +1,44 @@
+trigger:
+- container
+
+steps:
+- task: NodeTool@0
+  inputs:
+    versionSpec: '16.x'
+- task: Npm@1
+  inputs:
+    command: 'custom'
+    workingDir: '$(System.DefaultWorkingDirectory)/'
+    customCommand: 'install --force'
+
+- script: |
+    npm run build:$(env)
+  displayName: 'Run Build'
+
+- task: FtpUpload@2
+  inputs:
+    credentialsOption: 'inputs'
+    serverUrl: '$(FTPS_Endpoint)'
+    username: '$(FTPS_Username)'
+    password: '$(FTPS_Password)'
+    rootDirectory: '$(System.DefaultWorkingDirectory)/dist'
+    filePatterns: '**'
+    remoteDirectory: '/site/wwwroot/app'
+    clean: false
+    cleanContents: false
+    preservePaths: false
+    trustSSL: true
+- task: FtpUpload@2
+  inputs:
+    credentialsOption: 'inputs'
+    serverUrl: '$(FTPS_Endpoint)'
+    username: '$(FTPS_Username)'
+    password: '$(FTPS_Password)'
+    rootDirectory: '$(System.DefaultWorkingDirectory)/public/assets'
+    filePatterns: '**'
+    remoteDirectory: '/site/wwwroot/assets'
+    clean: false
+    cleanContents: false
+    preservePaths: false
+    trustSSL: true
+
